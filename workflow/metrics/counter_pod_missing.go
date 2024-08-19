@@ -2,6 +2,8 @@ package metrics
 
 import (
 	"context"
+
+	utilmetrics "github.com/argoproj/argo-workflows/v3/util/metrics"
 )
 
 const (
@@ -9,18 +11,18 @@ const (
 )
 
 func addPodMissingCounter(_ context.Context, m *Metrics) error {
-	return m.createInstrument(int64Counter,
+	return m.CreateInstrument(utilmetrics.Int64Counter,
 		namePodMissing,
 		"Incidents of pod missing.",
 		"{pod}",
-		withAsBuiltIn(),
+		utilmetrics.WithAsBuiltIn(),
 	)
 }
 
 func (m *Metrics) incPodMissing(ctx context.Context, val int64, recentlyStarted bool, phase string) {
-	m.addInt(ctx, namePodMissing, val, instAttribs{
-		{name: labelRecentlyStarted, value: recentlyStarted},
-		{name: labelNodePhase, value: phase},
+	m.AddInt(ctx, namePodMissing, val, utilmetrics.InstAttribs{
+		{Name: utilmetrics.LabelRecentlyStarted, Value: recentlyStarted},
+		{Name: utilmetrics.LabelNodePhase, Value: phase},
 	})
 }
 

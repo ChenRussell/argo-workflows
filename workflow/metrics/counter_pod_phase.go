@@ -2,6 +2,8 @@ package metrics
 
 import (
 	"context"
+
+	utilmetrics "github.com/argoproj/argo-workflows/v3/util/metrics"
 )
 
 const (
@@ -9,17 +11,17 @@ const (
 )
 
 func addPodPhaseCounter(_ context.Context, m *Metrics) error {
-	return m.createInstrument(int64Counter,
+	return m.CreateInstrument(utilmetrics.Int64Counter,
 		namePodPhase,
 		"Total number of Pods that have entered each phase",
 		"{pod}",
-		withAsBuiltIn(),
+		utilmetrics.WithAsBuiltIn(),
 	)
 }
 
 func (m *Metrics) ChangePodPhase(ctx context.Context, phase, namespace string) {
-	m.addInt(ctx, namePodPhase, 1, instAttribs{
-		{name: labelPodPhase, value: phase},
-		{name: labelPodNamespace, value: namespace},
+	m.AddInt(ctx, namePodPhase, 1, utilmetrics.InstAttribs{
+		{Name: utilmetrics.LabelPodPhase, Value: phase},
+		{Name: utilmetrics.LabelPodNamespace, Value: namespace},
 	})
 }

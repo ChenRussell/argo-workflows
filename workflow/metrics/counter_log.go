@@ -3,28 +3,30 @@ package metrics
 import (
 	"context"
 
+	utilmetrics "github.com/argoproj/argo-workflows/v3/util/metrics"
+
 	log "github.com/sirupsen/logrus"
 )
 
 type logMetric struct {
-	counter *instrument
+	counter *utilmetrics.Instrument
 }
 
 func addLogCounter(ctx context.Context, m *Metrics) error {
 	const nameLogMessages = `log_messages`
-	err := m.createInstrument(int64Counter,
+	err := m.CreateInstrument(utilmetrics.Int64Counter,
 		nameLogMessages,
 		"Total number of log messages.",
 		"{message}",
-		withAsBuiltIn(),
+		utilmetrics.WithAsBuiltIn(),
 	)
 	lm := logMetric{
-		counter: m.allInstruments[nameLogMessages],
+		counter: m.AllInstruments[nameLogMessages],
 	}
 	log.AddHook(lm)
 	for _, level := range lm.Levels() {
-		m.addInt(ctx, nameLogMessages, 0, instAttribs{
-			{name: labelLogLevel, value: level.String()},
+		m.AddInt(ctx, nameLogMessages, 0, utilmetrics.InstAttribs{
+			{Name: utilmetrics.LabelLogLevel, Value: level.String()},
 		})
 	}
 
@@ -36,8 +38,8 @@ func (m logMetric) Levels() []log.Level {
 }
 
 func (m logMetric) Fire(entry *log.Entry) error {
-	(*m.counter).addInt(entry.Context, 1, instAttribs{
-		{name: labelLogLevel, value: entry.Level.String()},
+	(*m.counter).AddInt(entry.Context, 1, utilmetrics.InstAttribs{
+		{Name: utilmetrics.LabelLogLevel, Value: entry.Level.String()},
 	})
 	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	utilmetrics "github.com/argoproj/argo-workflows/v3/util/metrics"
+
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
@@ -36,7 +38,7 @@ var sharedTE *TestExporter = nil
 // create workqueues with https://godocs.io/k8s.io/client-go/util/workqueue#NewRateLimitingQueueWithConfig
 func getSharedMetrics() (*Metrics, *TestExporter, error) {
 	if sharedMetrics == nil {
-		config := Config{
+		config := utilmetrics.Config{
 			Enabled: true,
 			TTL:     1 * time.Second,
 		}
@@ -54,17 +56,17 @@ func getSharedMetrics() (*Metrics, *TestExporter, error) {
 // CreateDefaultTestMetrics creates a boring testExporter enabled
 // metrics, suitable for many tests
 func CreateDefaultTestMetrics() (*Metrics, *TestExporter, error) {
-	config := Config{
+	config := utilmetrics.Config{
 		Enabled: true,
 	}
 	return createTestMetrics(&config, Callbacks{})
 }
 
-func createTestMetrics(config *Config, callbacks Callbacks) (*Metrics, *TestExporter, error) {
+func createTestMetrics(config *utilmetrics.Config, callbacks Callbacks) (*Metrics, *TestExporter, error) {
 	ctx /* with cancel*/ := context.Background()
 	te := newTestExporter()
 
-	m, err := New(ctx, TestScopeName, config, callbacks, metric.WithReader(te))
+	m, err := New(ctx, TestScopeName, TestScopeName, config, callbacks, metric.WithReader(te))
 	return m, te, err
 
 }

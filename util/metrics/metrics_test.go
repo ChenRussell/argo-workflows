@@ -100,7 +100,7 @@ func TestRealtimeMetricGC(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	m, err := New(ctx, TestScopeName, &config, Callbacks{})
+	m, err := New(ctx, TestScopeName, TestScopeName, &config, Callbacks{})
 	require.NoError(t, err)
 
 	labels := []*wfv1.MetricLabel{
@@ -170,7 +170,7 @@ func TestRealTimeMetricDeletion(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	m, err := New(ctx, TestScopeName, &config, Callbacks{})
+	m, err := New(ctx, TestScopeName, TestScopeName, &config, Callbacks{})
 	require.NoError(t, err)
 
 	// We've not yet fed a metric in for 123

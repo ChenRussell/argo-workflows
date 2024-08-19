@@ -22,7 +22,7 @@ func TestDisablePrometheusServer(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	m, err := New(ctx, TestScopeName, &config, Callbacks{})
+	m, err := New(ctx, TestScopeName, TestScopeName, &config, Callbacks{})
 	require.NoError(t, err)
 	go m.RunPrometheusServer(ctx, false)
 	time.Sleep(1 * time.Second) // to confirm that the server doesn't start, even if we wait
@@ -42,7 +42,7 @@ func TestPrometheusServer(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	m, err := New(ctx, TestScopeName, &config, Callbacks{})
+	m, err := New(ctx, TestScopeName, TestScopeName, &config, Callbacks{})
 	require.NoError(t, err)
 	go m.RunPrometheusServer(ctx, false)
 	time.Sleep(1 * time.Second)
@@ -68,7 +68,7 @@ func TestDummyPrometheusServer(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	m, err := New(ctx, TestScopeName, &config, Callbacks{})
+	m, err := New(ctx, TestScopeName, TestScopeName, &config, Callbacks{})
 	require.NoError(t, err)
 	go m.RunPrometheusServer(ctx, true)
 	time.Sleep(1 * time.Second)

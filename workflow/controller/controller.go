@@ -52,6 +52,7 @@ import (
 	"github.com/argoproj/argo-workflows/v3/util/diff"
 	"github.com/argoproj/argo-workflows/v3/util/env"
 	errorsutil "github.com/argoproj/argo-workflows/v3/util/errors"
+	utilmetrics "github.com/argoproj/argo-workflows/v3/util/metrics"
 	"github.com/argoproj/argo-workflows/v3/workflow/artifactrepositories"
 	"github.com/argoproj/argo-workflows/v3/workflow/common"
 	controllercache "github.com/argoproj/argo-workflows/v3/workflow/controller/cache"
@@ -221,6 +222,7 @@ func NewWorkflowController(ctx context.Context, restConfig *rest.Config, kubecli
 	wfc.maxStackDepth = wfc.getMaxStackDepth()
 	wfc.metrics, err = metrics.New(ctx,
 		`workflows-controller`,
+		`argo_workflows`,
 		wfc.getMetricsServerConfig(),
 		metrics.Callbacks{
 			PodPhase:          wfc.getPodPhaseMetrics,
@@ -1391,18 +1393,18 @@ func (wfc *WorkflowController) getMaxStackDepth() int {
 	return maxAllowedStackDepth
 }
 
-func (wfc *WorkflowController) getMetricsServerConfig() *metrics.Config {
+func (wfc *WorkflowController) getMetricsServerConfig() *utilmetrics.Config {
 	// Metrics config
-	modifiers := make(map[string]metrics.Modifier)
+	modifiers := make(map[string]utilmetrics.Modifier)
 	for name, modifier := range wfc.Config.MetricsConfig.Modifiers {
-		modifiers[name] = metrics.Modifier{
+		modifiers[name] = utilmetrics.Modifier{
 			Disabled:           modifier.Disabled,
 			DisabledAttributes: modifier.DisabledAttributes,
 			HistogramBuckets:   modifier.HistogramBuckets,
 		}
 	}
 
-	metricsConfig := metrics.Config{
+	metricsConfig := utilmetrics.Config{
 		Enabled:      wfc.Config.MetricsConfig.Enabled == nil || *wfc.Config.MetricsConfig.Enabled,
 		Path:         wfc.Config.MetricsConfig.Path,
 		Port:         wfc.Config.MetricsConfig.Port,

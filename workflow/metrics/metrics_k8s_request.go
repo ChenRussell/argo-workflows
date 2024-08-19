@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-workflows/v3/util/k8s"
+	utilmetrics "github.com/argoproj/argo-workflows/v3/util/metrics"
 )
 
 const (
@@ -16,21 +17,21 @@ const (
 )
 
 func addK8sRequests(_ context.Context, m *Metrics) error {
-	err := m.createInstrument(int64Counter,
+	err := m.CreateInstrument(utilmetrics.Int64Counter,
 		nameK8sRequestTotal,
 		"Number of kubernetes requests executed.",
 		"{request}",
-		withAsBuiltIn(),
+		utilmetrics.WithAsBuiltIn(),
 	)
 	if err != nil {
 		return err
 	}
-	err = m.createInstrument(float64Histogram,
+	err = m.CreateInstrument(utilmetrics.Float64Histogram,
 		nameK8sRequestDuration,
 		"Duration of kubernetes requests executed.",
 		"s",
-		withDefaultBuckets([]float64{0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 60.0, 180.0}),
-		withAsBuiltIn(),
+		utilmetrics.WithDefaultBuckets([]float64{0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 60.0, 180.0}),
+		utilmetrics.WithAsBuiltIn(),
 	)
 	// Register this metrics with the global
 	k8sMetrics.metrics = m
@@ -53,13 +54,13 @@ func (m metricsRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) 
 	duration := time.Since(startTime)
 	if x != nil && m.metrics != nil {
 		verb, kind := k8s.ParseRequest(r)
-		attribs := instAttribs{
-			{name: labelRequestKind, value: kind},
-			{name: labelRequestVerb, value: verb},
-			{name: labelRequestCode, value: x.StatusCode},
+		attribs := utilmetrics.InstAttribs{
+			{Name: utilmetrics.LabelRequestKind, Value: kind},
+			{Name: utilmetrics.LabelRequestVerb, Value: verb},
+			{Name: utilmetrics.LabelRequestCode, Value: x.StatusCode},
 		}
-		(*m.metrics).addInt(m.ctx, nameK8sRequestTotal, 1, attribs)
-		(*m.metrics).record(m.ctx, nameK8sRequestDuration, duration.Seconds(), attribs)
+		(*m.metrics).AddInt(m.ctx, nameK8sRequestTotal, 1, attribs)
+		(*m.metrics).Record(m.ctx, nameK8sRequestDuration, duration.Seconds(), attribs)
 	}
 	return x, err
 }
